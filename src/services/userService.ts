@@ -2,6 +2,13 @@ import { UserModel } from "../models/userModel";
 import bcrypt from "bcrypt";
 
 export class UserService {
+  static async findAll() {
+    return UserModel.find();
+  }
+
+  static findById(id: string) {
+    return UserModel.findById(id);
+  }
 
   static async register(email: string, password: string) {
     const existingUser = await UserModel.findOne({ email });
@@ -15,5 +22,4 @@ export class UserService {
 
     return user;
   }
-
 }

@@ -5,6 +5,8 @@ import { validateUser } from "../middlewares/validateUser";
 export function userRoutes(app: Application) {
   const router = Router();
 
+  router.get("/", UserController.findAll);
+  router.get("/:id", UserController.findById);
   router.post("/", validateUser, UserController.register);
 
   app.use("/users", router);
