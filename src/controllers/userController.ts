@@ -35,4 +35,24 @@ export class UserController {
       response.status(400).json({ message: error.message });
     }
   }
+
+  static async update(request: Request, response: Response) {
+    try {
+      const user = await UserService.findById(request.params.id);
+      if (!user) {
+        response.status(404).json({ message: "Usuário não encontrado." });
+        return;
+      }
+
+      const updatedUser = await UserService.update(
+        request.params.id,
+        request.body
+      );
+      response.json({
+        message: "Usuário atualizado com sucesso.",
+      });
+    } catch (error: any) {
+      response.status(400).json({ message: error.message });
+    }
+  }
 }

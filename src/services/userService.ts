@@ -22,4 +22,25 @@ export class UserService {
 
     return user;
   }
+
+  static async update(
+    id: string,
+    updateData: Partial<{ email: string; password: string }>
+  ) {
+    const user = await UserModel.findOne({ email: updateData.email });
+    if (user && user.id !== id) {
+      throw new Error("Email já cadastrado.");
+    }
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    return updatedUser;
+  }
 }
