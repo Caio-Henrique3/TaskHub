@@ -16,7 +16,7 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 
 ## 📌 Funcionalidades
 
-- ⏳ Registro de usuários com senha criptografada
+- ✅ Registro de usuários com senha criptografada
 - ⏳ Login com geração de token JWT
 - ⏳ CRUD completo de tarefas (Create, Read, Update, Delete)
 - ⏳ Rotas protegidas por autenticação
