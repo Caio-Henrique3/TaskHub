@@ -44,15 +44,27 @@ export class UserController {
         return;
       }
 
-      const updatedUser = await UserService.update(
-        request.params.id,
-        request.body
-      );
+      await UserService.update(request.params.id, request.body);
       response.json({
         message: "Usuário atualizado com sucesso.",
       });
     } catch (error: any) {
       response.status(400).json({ message: error.message });
+    }
+  }
+
+  static async delete(request: Request, response: Response) {
+    try {
+      const user = await UserService.findById(request.params.id);
+      if (!user) {
+        response.status(404).json({ message: "Usuário não encontrado." });
+        return;
+      }
+
+      await UserService.delete(request.params.id);
+      response.status(204).send();
+    } catch (error: any) {
+      response.status(500).json({ message: "Erro ao deletar usuário." });
     }
   }
 }

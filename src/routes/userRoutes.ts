@@ -9,6 +9,7 @@ export function userRoutes(app: Application) {
   router.get("/:id", UserController.findById);
   router.post("/", validateUser, UserController.register);
   router.put("/:id", validateUser, UserController.update);
+  router.delete("/:id", UserController.delete);
 
   app.use("/users", router);
 }
