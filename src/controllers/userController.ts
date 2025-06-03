@@ -15,6 +15,7 @@ export class UserController {
       const user = await UserService.findById(request.params.id);
       if (!user) {
         response.status(404).json({ message: "Usuário não encontrado." });
+
         return;
       }
 
@@ -41,6 +42,7 @@ export class UserController {
       const user = await UserService.findById(request.params.id);
       if (!user) {
         response.status(404).json({ message: "Usuário não encontrado." });
+
         return;
       }
 
