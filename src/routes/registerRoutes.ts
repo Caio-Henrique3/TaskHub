@@ -1,6 +1,7 @@
 import { Application } from "express";
-import { userRoutes } from "./userRoutes";
 import { authRoutes } from "./authRoutes";
+import { userRoutes } from "./userRoutes";
+import { taskRoutes } from "./taskRoutes";
 
 export function registerRoutes(app: Application) {
   app.get("/", (_, res) => {
@@ -9,4 +10,5 @@ export function registerRoutes(app: Application) {
 
   authRoutes(app);
   userRoutes(app);
+  taskRoutes(app);
 }

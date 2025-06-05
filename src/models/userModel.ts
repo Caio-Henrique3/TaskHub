@@ -1,6 +1,6 @@
 import { Schema, model, InferSchemaType } from "mongoose";
 
-export const UserSchema = new Schema({
+const UserSchema = new Schema({
   email: { type: String, required: true, unique: true, maxlength: 100 },
   password: { type: String, required: true }
 });
