@@ -1,6 +1,9 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import { NotFoundError, ValidationError } from "../utils/errors";
 import { TaskService } from "../services/taskService";
 import { Task } from "../models/taskModel";
+import { UserService } from "../services/userService";
+import mongoose from "mongoose";
 
 function buildTaskFilters(query: any) {
   const filters: any = { ...query };
@@ -50,66 +53,123 @@ function buildTaskFilters(query: any) {
   return filters;
 }
 
+async function validateRelatedUser(users: string | string[]) {
+  const relatedUsers = Array.isArray(users) ? users : [users];
+  for (const relatedUser of relatedUsers) {
+    if (!(await UserService.findById(relatedUser))) {
+      throw new NotFoundError(`Usuário com id ${relatedUser} não encontrado.`);
+    }
+  }
+}
+
 export class TaskController {
-  static async findAll(request: Request, response: Response) {
+  static async findAll(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     try {
-      response.send(await TaskService.findAll(buildTaskFilters(request.query)));
+      const filters = buildTaskFilters(request.query);
+      if (filters.user) {
+        await validateRelatedUser(filters.user);
+      }
+
+      response.send(await TaskService.findAll(filters));
     } catch (error: any) {
-      response.status(500).json({ message: "Erro ao buscar tarefas." });
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      next(error);
     }
   }
 
-  static async findById(request: Request, response: Response) {
+  static async findById(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     try {
       const task = await TaskService.findById(request.params.id);
       if (!task) {
-        response.status(404).json({ message: "Tarefa não encontrado." });
-
-        return;
+        throw new NotFoundError(
+          `Tarefa com id ${request.params.id} não encontrada.`
+        );
       }
 
       response.send(task);
     } catch (error: any) {
-      response.status(500).json({ message: "Erro ao buscar tarefa." });
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      next(error);
     }
   }
 
-  static async create(request: Request, response: Response) {
+  static async create(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     try {
+      await validateRelatedUser(request.body.user);
+
       response.status(201).send(await TaskService.create(request.body as Task));
     } catch (error: any) {
-      response.status(400).json({ message: error.message });
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      next(error);
     }
   }
 
-  static async update(request: Request, response: Response) {
+  static async update(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     try {
-      const user = await TaskService.findById(request.params.id);
-      if (!user) {
-        response.status(404).json({ message: "Task não encontrado." });
-
-        return;
+      const task = await TaskService.findById(request.params.id);
+      if (!task) {
+        throw new NotFoundError(
+          `Tarefa com id ${request.params.id} não encontrada.`
+        );
       }
 
       response.send(
         await TaskService.update(request.params.id, request.body as Task)
       );
     } catch (error: any) {
-      response.status(400).json({ message: error.message });
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      next(error);
     }
   }
 
-  static async delete(request: Request, response: Response) {
+  static async delete(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     try {
       if (!(await TaskService.findById(request.params.id))) {
-        response.status(404).json({ message: "Task não encontrado." });
-        return;
+        throw new NotFoundError(
+          `Tarefa com id ${request.params.id} não encontrada.`
+        );
       }
 
       await TaskService.delete(request.params.id);
       response.status(204).send();
     } catch (error: any) {
-      response.status(500).json({ message: "Erro ao deletar task." });
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      next(error);
     }
   }
 }
