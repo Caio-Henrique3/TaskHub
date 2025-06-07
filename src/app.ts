@@ -1,4 +1,5 @@
 import express from "express";
+import { errorHandler } from "./middleware/errorHandler";
 import { connectToDatabase } from "./database/connection";
 import { config } from "dotenv";
 import { registerRoutes } from "./routes/registerRoutes";
@@ -12,6 +13,8 @@ async function startServer() {
   await connectToDatabase();
 
   registerRoutes(app);
+
+  app.use(errorHandler);
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {

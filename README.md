@@ -18,9 +18,12 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 
 - ✅ Registro de usuários com senha criptografada
 - ✅ Login com geração de token JWT
-- ⏳ CRUD completo de tarefas (Create, Read, Update, Delete)
-- ⏳ Rotas protegidas por autenticação
-- ⏳ Filtro de tarefas por status
+- ✅ CRUD completo de tarefas (Create, Read, Update, Delete)
+- ✅ Rotas protegidas por autenticação
+- ✅ Filtro de tarefas por status (Obs: Implementação já criada para utilização de diversos filtros)
+- ⏳ Paginação de consultas
+- ⏳ Recorrência de tarefas
+- ⏳ Construção do swagger
 
 ### Pré-requisitos
 
