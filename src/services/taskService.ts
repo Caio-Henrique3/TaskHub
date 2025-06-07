@@ -2,8 +2,11 @@ import { FilterQuery } from "mongoose";
 import { Task, TaskModel } from "../models/taskModel";
 
 export class TaskService {
-  static async findAll(filters: FilterQuery<any>) {
-    return TaskModel.find(filters).populate("user", "-password");
+  static async findAll(filters: FilterQuery<any>, limit = 10, skip = 0) {
+    return TaskModel.find(filters)
+      .populate("user", "-password")
+      .limit(limit)
+      .skip(skip);
   }
 
   static findById(id: string) {
@@ -24,4 +27,9 @@ export class TaskService {
   static async delete(id: string) {
     await TaskModel.findByIdAndDelete(id);
   }
+
+  static async count(filters: FilterQuery<any>) {
+    return TaskModel.countDocuments(filters);
+  }
+
 }

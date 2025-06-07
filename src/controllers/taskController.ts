@@ -1,3 +1,4 @@
+import { getPagination } from "../utils/pagination";
 import { NextFunction, Request, Response } from "express";
 import { NotFoundError, ValidationError } from "../utils/errors";
 import { TaskService } from "../services/taskService";
@@ -74,7 +75,20 @@ export class TaskController {
         await validateRelatedUser(filters.user);
       }
 
-      response.send(await TaskService.findAll(filters));
+      const { page, limit, skip } = getPagination(filters);
+
+      const [tasks, total] = await Promise.all([
+        TaskService.findAll(filters, limit, skip),
+        TaskService.count(filters),
+      ]);
+
+      response.json({
+        data: tasks,
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      });
     } catch (error: any) {
       if (error instanceof mongoose.Error.CastError) {
         throw new ValidationError(`Id ${error.value} é inválido.`);
