@@ -21,7 +21,7 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 - ✅ CRUD completo de tarefas (Create, Read, Update, Delete)
 - ✅ Rotas protegidas por autenticação
 - ✅ Filtro de tarefas por status (Obs: Implementação já criada para utilização de diversos filtros)
-- ⏳ Paginação de consultas
+- ✅ Paginação de consultas
 - ⏳ Recorrência de tarefas
 - ⏳ Construção do swagger
 
