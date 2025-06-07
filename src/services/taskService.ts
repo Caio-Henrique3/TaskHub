@@ -1,8 +1,9 @@
+import { FilterQuery } from "mongoose";
 import { Task, TaskModel } from "../models/taskModel";
 
 export class TaskService {
-  static async findAll() {
-    return TaskModel.find().populate("user", "-password");
+  static async findAll(filters: FilterQuery<any>) {
+    return TaskModel.find(filters).populate("user", "-password");
   }
 
   static findById(id: string) {

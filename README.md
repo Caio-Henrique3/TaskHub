@@ -20,7 +20,8 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 - ✅ Login com geração de token JWT
 - ✅ CRUD completo de tarefas (Create, Read, Update, Delete)
 - ✅ Rotas protegidas por autenticação
-- ⏳ Filtro de tarefas por status
+- ⏳ Filtro de tarefas por status (Obs: Implementação já criada para utilização de diversos filtros)
+- ⏳ Paginação de consultas
 - ⏳ Construção de lógica de recorrência
 
 ### Pré-requisitos

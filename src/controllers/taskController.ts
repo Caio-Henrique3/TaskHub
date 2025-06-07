@@ -2,10 +2,58 @@ import { Request, Response } from "express";
 import { TaskService } from "../services/taskService";
 import { Task } from "../models/taskModel";
 
+function buildTaskFilters(query: any) {
+  const filters: any = { ...query };
+
+  if (filters.title) {
+    filters.title = { $regex: filters.title, $options: "i" };
+  }
+
+  if (filters.description) {
+    filters.description = { $regex: filters.description, $options: "i" };
+  }
+
+  if (filters.status) {
+    filters.status = { $regex: filters.status, $options: "i" };
+  }
+
+  if (filters.recurrence) {
+    filters.recurrence = { $regex: filters.recurrence, $options: "i" };
+  }
+
+  const dateFields = ["creationDate", "completionDeadline", "completionDate"];
+  dateFields.forEach((field) => {
+    const from = query[`${field}From`];
+    const to = query[`${field}To`];
+    if (from || to) {
+      filters[field] = {};
+      if (from) {
+        if (isNaN(Date.parse(from as string))) {
+          throw new Error(`Formato de data inválido: ${field}From`);
+        }
+
+        filters[field]["$gte"] = new Date(from as string);
+        delete filters[`${field}From`];
+      }
+
+      if (to) {
+        if (isNaN(Date.parse(to as string))) {
+          throw new Error(`Formato de data inválido: ${field}To`);
+        }
+
+        filters[field]["$lte"] = new Date(to as string);
+        delete filters[`${field}To`];
+      }
+    }
+  });
+
+  return filters;
+}
+
 export class TaskController {
-  static async findAll(_: any, response: Response) {
+  static async findAll(request: Request, response: Response) {
     try {
-      response.send(await TaskService.findAll());
+      response.send(await TaskService.findAll(buildTaskFilters(request.query)));
     } catch (error: any) {
       response.status(500).json({ message: "Erro ao buscar tarefas." });
     }
