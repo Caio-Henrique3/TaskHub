@@ -22,7 +22,7 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 - ✅ Rotas protegidas por autenticação
 - ✅ Filtro de tarefas por status (Obs: Implementação já criada para utilização de diversos filtros)
 - ✅ Paginação de consultas
-- ⏳ Recorrência de tarefas
+- ✅ Recorrência de tarefas
 - ⏳ Construção do swagger
 
 ### Pré-requisitos

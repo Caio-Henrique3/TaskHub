@@ -25,7 +25,11 @@ function buildTaskFilters(query: any) {
     filters.recurrence = { $regex: filters.recurrence, $options: "i" };
   }
 
-  const dateFields = ["creationDate", "completionDeadline", "completionDate"];
+  const dateFields = [
+    "suggestedStartDate",
+    "completionDeadline",
+    "completionDate",
+  ];
   dateFields.forEach((field) => {
     const from = query[`${field}From`];
     const to = query[`${field}To`];
@@ -61,6 +65,82 @@ async function validateRelatedUser(users: string | string[]) {
       throw new NotFoundError(`Usuário com id ${relatedUser} não encontrado.`);
     }
   }
+}
+
+async function buildRecurrence(task: Task, createdTask: any) {
+  const {
+    _id,
+    appellant,
+    recurrence,
+    recurrenceEndDate,
+    suggestedStartDate,
+    completionDeadline,
+  } = createdTask;
+  if (!appellant) return;
+
+  if (!recurrenceEndDate) {
+    await TaskService.delete(_id);
+
+    throw new ValidationError(
+      "Não é possível criar uma tarefa recorrente sem os campos recurrenceEndDate."
+    );
+  }
+
+  const tasksToCreate = [];
+  let nextStartDate = new Date(suggestedStartDate);
+  let nextDeadlineDate = new Date(completionDeadline);
+
+  while (true) {
+    let newStartDate = new Date(nextStartDate);
+    let newDeadlineDate = new Date(nextDeadlineDate);
+
+    switch (recurrence) {
+      case "daily":
+        newStartDate.setDate(newStartDate.getDate() + 1);
+        newDeadlineDate.setDate(newDeadlineDate.getDate() + 1);
+        break;
+      case "weekly":
+        newStartDate.setDate(newStartDate.getDate() + 7);
+        newDeadlineDate.setDate(newDeadlineDate.getDate() + 7);
+        break;
+      case "monthly":
+        newStartDate.setMonth(newStartDate.getMonth() + 1);
+        newDeadlineDate.setMonth(newDeadlineDate.getMonth() + 1);
+        break;
+      case "annual":
+        newStartDate.setFullYear(newStartDate.getFullYear() + 1);
+        newDeadlineDate.setFullYear(newDeadlineDate.getFullYear() + 1);
+        break;
+      default:
+        await TaskService.delete(createdTask._id);
+
+        throw new ValidationError(`Valor ${recurrence} inexistente.`);
+    }
+
+    if (toDateOnly(newStartDate) > toDateOnly(new Date(recurrenceEndDate)))
+      break;
+
+    tasksToCreate.push({
+      ...task,
+      parentTask: _id,
+      appellant: false,
+      recurrence: null,
+      recurrenceEndDate: null,
+      suggestedStartDate: newStartDate,
+      completionDeadline: newDeadlineDate,
+    });
+
+    nextStartDate = newStartDate;
+    nextDeadlineDate = newDeadlineDate;
+  }
+
+  if (tasksToCreate.length) {
+    await TaskService.createMany(tasksToCreate);
+  }
+}
+
+function toDateOnly(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 export class TaskController {
@@ -129,7 +209,12 @@ export class TaskController {
     try {
       await validateRelatedUser(request.body.user);
 
-      response.status(201).send(await TaskService.create(request.body as Task));
+      const task = request.body as Task;
+      const createdTask = await TaskService.create(task);
+
+      buildRecurrence(task, createdTask);
+
+      response.status(201).send();
     } catch (error: any) {
       if (error instanceof mongoose.Error.CastError) {
         throw new ValidationError(`Id ${error.value} é inválido.`);
@@ -145,16 +230,17 @@ export class TaskController {
     next: NextFunction
   ) {
     try {
-      const task = await TaskService.findById(request.params.id);
-      if (!task) {
+      const taskUpdated = await TaskService.update(
+        request.params.id,
+        request.body as Task
+      );
+      if (!taskUpdated) {
         throw new NotFoundError(
           `Tarefa com id ${request.params.id} não encontrada.`
         );
       }
 
-      response.send(
-        await TaskService.update(request.params.id, request.body as Task)
-      );
+      response.send(taskUpdated);
     } catch (error: any) {
       if (error instanceof mongoose.Error.CastError) {
         throw new ValidationError(`Id ${error.value} é inválido.`);
@@ -170,13 +256,12 @@ export class TaskController {
     next: NextFunction
   ) {
     try {
-      if (!(await TaskService.findById(request.params.id))) {
+      if (!(await TaskService.delete(request.params.id))) {
         throw new NotFoundError(
           `Tarefa com id ${request.params.id} não encontrada.`
         );
       }
 
-      await TaskService.delete(request.params.id);
       response.status(204).send();
     } catch (error: any) {
       if (error instanceof mongoose.Error.CastError) {
