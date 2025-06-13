@@ -17,6 +17,10 @@ export class TaskService {
     return new TaskModel(task).save();
   }
 
+  static async createMany(tasks: Task[]) {
+    return TaskModel.insertMany(tasks);
+  }
+
   static async update(id: string, updateData: Task) {
     return await TaskModel.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -25,11 +29,10 @@ export class TaskService {
   }
 
   static async delete(id: string) {
-    await TaskModel.findByIdAndDelete(id);
+    return await TaskModel.findByIdAndDelete(id);
   }
 
   static async count(filters: FilterQuery<any>) {
     return TaskModel.countDocuments(filters);
   }
-
 }
