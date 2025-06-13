@@ -51,6 +51,7 @@ npm install
 PORT=3000
 MONGO_URI=mongodb://localhost:27017/taskhub
 JWT_SECRET=sua_chave_secreta
+TIME_ZONE=-3
 ```
 
 ### 4. Inicie a aplicação
