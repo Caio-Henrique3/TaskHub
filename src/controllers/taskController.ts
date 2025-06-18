@@ -1,10 +1,209 @@
-import { getPagination } from "../utils/pagination";
-import { NextFunction, Request, Response } from "express";
-import { NotFoundError, ValidationError } from "../utils/errors";
+import {
+  Controller,
+  Route,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Path,
+  Query,
+  Response,
+  SuccessResponse,
+  Tags,
+  Security,
+} from "tsoa";
 import { TaskService } from "../services/taskService";
-import { Task } from "../models/taskModel";
 import { UserService } from "../services/userService";
+import { ITask, Task, TaskModel } from "../models/taskModel";
 import mongoose from "mongoose";
+import { NotFoundError, ValidationError } from "../utils/errors";
+import { getPagination } from "../utils/pagination";
+
+interface PaginatedTasksResponse {
+  data: Task[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface TaskFilters {
+  title?: string;
+  description?: string;
+  status?: string;
+  recurrence?: string;
+  user?: string[];
+  suggestedStartDateFrom?: string;
+  suggestedStartDateTo?: string;
+  completionDeadlineFrom?: string;
+  completionDeadlineTo?: string;
+  completionDateFrom?: string;
+  completionDateTo?: string;
+}
+
+@Route("tasks")
+@Tags("Tasks")
+export class TaskController extends Controller {
+  @Get()
+  @Security("bearerAuth")
+  @Response<PaginatedTasksResponse>(
+    200,
+    "Lista de tarefas retornada com sucesso"
+  )
+  @Response<ValidationError>(400, "Parâmetros inválidos")
+  public async findAll(
+    @Query() title?: string,
+    @Query() description?: string,
+    @Query() status?: string,
+    @Query() recurrence?: string,
+    @Query() user?: string[],
+    @Query() suggestedStartDateFrom?: string,
+    @Query() suggestedStartDateTo?: string,
+    @Query() completionDeadlineFrom?: string,
+    @Query() completionDeadlineTo?: string,
+    @Query() completionDateFrom?: string,
+    @Query() completionDateTo?: string,
+    @Query() page?: number,
+    @Query() limit?: number
+  ): Promise<PaginatedTasksResponse> {
+    try {
+      const filters = {
+        title,
+        description,
+        status,
+        recurrence,
+        user,
+        suggestedStartDateFrom,
+        suggestedStartDateTo,
+        completionDeadlineFrom,
+        completionDeadlineTo,
+        completionDateFrom,
+        completionDateTo,
+      };
+
+      const paginationParams = {
+        page,
+        limit,
+      };
+
+      const builtFilters = buildTaskFilters(filters);
+
+      if (builtFilters.user) {
+        await validateRelatedUser(builtFilters.user);
+      }
+
+      const { currentPage, currentLimit, skip } =
+        getPagination(paginationParams);
+
+      const [tasks, total] = await Promise.all([
+        TaskService.findAll(builtFilters, currentLimit, skip),
+        TaskService.count(builtFilters),
+      ]);
+
+      return {
+        data: tasks.map((task) => toTaskResponse(task)),
+        page: currentPage,
+        limit: currentLimit,
+        total,
+        totalPages: Math.ceil(total / currentLimit),
+      };
+    } catch (error: any) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      throw error;
+    }
+  }
+
+  @Get("{id}")
+  @Security("bearerAuth")
+  @Response<Task>(200, "Tarefa encontrada")
+  @Response<NotFoundError>(404, "Tarefa não encontrada")
+  @Response<ValidationError>(400, "ID inválido")
+  public async findById(@Path() id: string): Promise<Task> {
+    try {
+      const task = await TaskService.findById(id);
+      if (!task) {
+        throw new NotFoundError(`Tarefa com id ${id} não encontrada.`);
+      }
+
+      return toTaskResponse(task);
+    } catch (error: any) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      throw error;
+    }
+  }
+
+  @Post()
+  @Security("bearerAuth")
+  @SuccessResponse(201, "Tarefa criada com sucesso")
+  @Response<ValidationError>(400, "Dados inválidos")
+  @Response<NotFoundError>(404, "Usuário relacionado não encontrado")
+  public async create(@Body() requestBody: Task): Promise<void> {
+    try {
+      await validateRelatedUser(requestBody.user);
+
+      const { _id, ...task } = requestBody as any;
+
+      const createdTask = await TaskService.create(task);
+      await buildRecurrence(task, createdTask);
+    } catch (error: any) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      throw error;
+    }
+  }
+
+  @Put("{id}")
+  @Security("bearerAuth")
+  @Response<Task>(200, "Tarefa atualizada")
+  @Response<NotFoundError>(404, "Tarefa não encontrada")
+  @Response<ValidationError>(400, "Dados inválidos")
+  public async update(
+    @Path() id: string,
+    @Body() requestBody: Task
+  ): Promise<Task> {
+    try {
+      const taskUpdated = await TaskService.update(id, requestBody);
+      if (!taskUpdated) {
+        throw new NotFoundError(`Tarefa com id ${id} não encontrada.`);
+      }
+
+      return toTaskResponse(taskUpdated);
+    } catch (error: any) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+      throw error;
+    }
+  }
+
+  @Delete("{id}")
+  @Security("bearerAuth")
+  @SuccessResponse(204, "Tarefa deletada com sucesso")
+  @Response<NotFoundError>(404, "Tarefa não encontrada")
+  @Response<ValidationError>(400, "ID inválido")
+  public async delete(@Path() id: string): Promise<void> {
+    try {
+      if (!(await TaskService.delete(id))) {
+        throw new NotFoundError(`Tarefa com id ${id} não encontrada.`);
+      }
+    } catch (error: any) {
+      if (error instanceof mongoose.Error.CastError) {
+        throw new ValidationError(`Id ${error.value} é inválido.`);
+      }
+
+      throw error;
+    }
+  }
+}
 
 function buildTaskFilters(query: any) {
   const filters: any = { ...query };
@@ -55,6 +254,12 @@ function buildTaskFilters(query: any) {
     }
   });
 
+  Object.keys(filters).forEach((key) => {
+    if (filters[key] === undefined) {
+      delete filters[key];
+    }
+  });
+
   return filters;
 }
 
@@ -67,7 +272,7 @@ async function validateRelatedUser(users: string | string[]) {
   }
 }
 
-async function buildRecurrence(task: Task, createdTask: any) {
+async function buildRecurrence(task: ITask, createdTask: any) {
   const {
     _id,
     appellant,
@@ -86,7 +291,7 @@ async function buildRecurrence(task: Task, createdTask: any) {
     );
   }
 
-  const tasksToCreate = [];
+  const tasksToCreate: ITask[] = [];
   let nextStartDate = new Date(suggestedStartDate);
   let nextDeadlineDate = new Date(completionDeadline);
 
@@ -120,15 +325,21 @@ async function buildRecurrence(task: Task, createdTask: any) {
     if (toDateOnly(newStartDate) > toDateOnly(new Date(recurrenceEndDate)))
       break;
 
-    tasksToCreate.push({
-      ...task,
-      parentTask: _id,
-      appellant: false,
-      recurrence: null,
-      recurrenceEndDate: null,
+    const newTask = new TaskModel({
+      title: task.title,
+      description: task.description,
       suggestedStartDate: newStartDate,
       completionDeadline: newDeadlineDate,
+      completionDate: undefined,
+      appellant: false,
+      recurrence: undefined,
+      recurrenceEndDate: undefined,
+      status: task.status,
+      user: task.user,
+      parentTask: _id,
     });
+
+    tasksToCreate.push(newTask);
 
     nextStartDate = newStartDate;
     nextDeadlineDate = newDeadlineDate;
@@ -143,132 +354,9 @@ function toDateOnly(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-export class TaskController {
-  static async findAll(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
-    try {
-      const filters = buildTaskFilters(request.query);
-      if (filters.user) {
-        await validateRelatedUser(filters.user);
-      }
-
-      const { page, limit, skip } = getPagination(filters);
-
-      const [tasks, total] = await Promise.all([
-        TaskService.findAll(filters, limit, skip),
-        TaskService.count(filters),
-      ]);
-
-      response.json({
-        data: tasks,
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      });
-    } catch (error: any) {
-      if (error instanceof mongoose.Error.CastError) {
-        throw new ValidationError(`Id ${error.value} é inválido.`);
-      }
-
-      next(error);
-    }
-  }
-
-  static async findById(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
-    try {
-      const task = await TaskService.findById(request.params.id);
-      if (!task) {
-        throw new NotFoundError(
-          `Tarefa com id ${request.params.id} não encontrada.`
-        );
-      }
-
-      response.send(task);
-    } catch (error: any) {
-      if (error instanceof mongoose.Error.CastError) {
-        throw new ValidationError(`Id ${error.value} é inválido.`);
-      }
-
-      next(error);
-    }
-  }
-
-  static async create(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
-    try {
-      await validateRelatedUser(request.body.user);
-
-      const task = request.body as Task;
-      const createdTask = await TaskService.create(task);
-
-      buildRecurrence(task, createdTask);
-
-      response.status(201).send();
-    } catch (error: any) {
-      if (error instanceof mongoose.Error.CastError) {
-        throw new ValidationError(`Id ${error.value} é inválido.`);
-      }
-
-      next(error);
-    }
-  }
-
-  static async update(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
-    try {
-      const taskUpdated = await TaskService.update(
-        request.params.id,
-        request.body as Task
-      );
-      if (!taskUpdated) {
-        throw new NotFoundError(
-          `Tarefa com id ${request.params.id} não encontrada.`
-        );
-      }
-
-      response.send(taskUpdated);
-    } catch (error: any) {
-      if (error instanceof mongoose.Error.CastError) {
-        throw new ValidationError(`Id ${error.value} é inválido.`);
-      }
-
-      next(error);
-    }
-  }
-
-  static async delete(
-    request: Request,
-    response: Response,
-    next: NextFunction
-  ) {
-    try {
-      if (!(await TaskService.delete(request.params.id))) {
-        throw new NotFoundError(
-          `Tarefa com id ${request.params.id} não encontrada.`
-        );
-      }
-
-      response.status(204).send();
-    } catch (error: any) {
-      if (error instanceof mongoose.Error.CastError) {
-        throw new ValidationError(`Id ${error.value} é inválido.`);
-      }
-
-      next(error);
-    }
-  }
+function toTaskResponse(task: any): Task {
+  return {
+    ...task._doc,
+    _id: task._id,
+  };
 }

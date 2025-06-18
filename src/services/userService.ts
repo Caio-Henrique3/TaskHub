@@ -1,9 +1,10 @@
+import { FilterQuery } from "mongoose";
 import { UserModel } from "../models/userModel";
 import bcrypt from "bcrypt";
 
 export class UserService {
-  static async findAll() {
-    return UserModel.find();
+  static async findAll(filters: FilterQuery<any>, limit = 10, skip = 0) {
+    return UserModel.find(filters).limit(limit).skip(skip).select("-password");
   }
 
   static findById(id: string) {
@@ -45,6 +46,10 @@ export class UserService {
   }
 
   static async delete(id: string) {
-    await UserModel.findByIdAndDelete(id);
+    return await UserModel.findByIdAndDelete(id);
+  }
+
+  static async count(filters: FilterQuery<any>) {
+    return UserModel.countDocuments(filters);
   }
 }

@@ -13,12 +13,9 @@ export function getPagination(query: any) {
     );
   }
 
-  delete query.page;
-  delete query.limit;
-
   return {
-    page: page || 1,
-    limit: limit || 10,
+    currentPage: page || 1,
+    currentLimit: limit || 10,
     skip: ((page || 1) - 1) * (limit || 10),
   };
 }

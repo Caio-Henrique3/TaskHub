@@ -1,5 +1,5 @@
 import { FilterQuery } from "mongoose";
-import { Task, TaskModel } from "../models/taskModel";
+import { ITask, Task, TaskModel } from "../models/taskModel";
 
 export class TaskService {
   static async findAll(filters: FilterQuery<any>, limit = 10, skip = 0) {
@@ -13,11 +13,11 @@ export class TaskService {
     return TaskModel.findById(id).populate("user", "-password");
   }
 
-  static create(task: Task) {
+  static create(task: ITask) {
     return new TaskModel(task).save();
   }
 
-  static async createMany(tasks: Task[]) {
+  static async createMany(tasks: ITask[]) {
     return TaskModel.insertMany(tasks);
   }
 

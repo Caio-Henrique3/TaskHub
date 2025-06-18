@@ -1,4 +1,4 @@
-import { InferSchemaType, model, Schema } from "mongoose";
+import { Document, model, Schema } from "mongoose";
 
 const TaskSchema = new Schema({
   title: { type: String, required: true },
@@ -35,6 +35,33 @@ const TaskSchema = new Schema({
   parentTask: { type: Schema.Types.ObjectId, ref: "Task" },
 });
 
-export type Task = InferSchemaType<typeof TaskSchema>;
+export const TaskModel = model<ITask>("Task", TaskSchema);
 
-export const TaskModel = model<Task>("Task", TaskSchema);
+export interface ITask extends Document {
+  title: string;
+  description: string;
+  suggestedStartDate: Date;
+  completionDeadline: Date;
+  completionDate?: Date;
+  appellant: boolean;
+  recurrenceEndDate?: Date;
+  recurrence?: "daily" | "weekly" | "monthly" | "annual";
+  status: "pending" | "started" | "completed" | "canceled";
+  user: Schema.Types.ObjectId;
+  parentTask?: Schema.Types.ObjectId;
+}
+
+export interface Task {
+  _id?: string;
+  title: string;
+  description: string;
+  suggestedStartDate: Date;
+  completionDeadline: Date;
+  completionDate?: Date;
+  appellant: boolean;
+  recurrenceEndDate?: Date;
+  recurrence?: "daily" | "weekly" | "monthly" | "annual";
+  status: "pending" | "started" | "completed" | "canceled";
+  user: string;
+  parentTask?: string;
+}
