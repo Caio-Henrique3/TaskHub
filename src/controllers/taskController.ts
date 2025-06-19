@@ -230,15 +230,21 @@ export class TaskController {
     next: NextFunction
   ) {
     try {
+      await validateRelatedUser(request.body.user);
+
+      const task = request.body as Task;
+
       const taskUpdated = await TaskService.update(
         request.params.id,
-        request.body as Task
+        task
       );
       if (!taskUpdated) {
         throw new NotFoundError(
           `Tarefa com id ${request.params.id} não encontrada.`
         );
       }
+
+      buildRecurrence(task, taskUpdated);
 
       response.send(taskUpdated);
     } catch (error: any) {
