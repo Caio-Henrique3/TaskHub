@@ -2,6 +2,19 @@ import { Application, Router } from "express";
 import { validateUser } from "../middlewares/validateUser";
 import { AuthController } from "../controllers/authController";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Auth:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *         password:
+ *           type: string
+ */
+
 export function authRoutes(app: Application) {
   const router = Router();
 
