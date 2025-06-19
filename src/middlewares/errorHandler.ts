@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
 
 export function errorHandler(
   err: any,

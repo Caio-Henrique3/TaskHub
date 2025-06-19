@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { UnauthorizedError, ForbiddenError } from "../utils/errors";
 
 export function authenticateToken(
   request: Request,
@@ -10,16 +11,12 @@ export function authenticateToken(
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    response.status(401).json({ message: "Token não fornecido." });
-
-    return;
+    throw new UnauthorizedError("Token não fornecido.");
   }
 
   jwt.verify(token, process.env.JWT_SECRET as string, (err, user) => {
     if (err) {
-      response.status(403).json({ message: "Token inválido ou expirado." });
-
-      return;
+      throw new ForbiddenError("Token inválido ou expirado.");
     }
 
     // @ts-ignore

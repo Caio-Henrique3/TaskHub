@@ -1,24 +1,21 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserModel } from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { UnauthorizedError } from "../utils/errors";
 
 export class AuthController {
-  static async login(request: Request, response: Response) {
+  static async login(request: Request, response: Response, next: NextFunction) {
     const { email, password } = request.body;
     try {
       const user = await UserModel.findOne({ email });
       if (!user) {
-        response.status(401).json({ message: "Credenciais inválidas." });
-
-        return;
+        throw new UnauthorizedError("Credenciais inválidas.");
       }
 
       const validPassword = await bcrypt.compare(password, user.password);
       if (!validPassword) {
-        response.status(401).json({ message: "Credenciais inválidas." });
-
-        return;
+        throw new UnauthorizedError("Senha inválida.");
       }
 
       const token = jwt.sign(
@@ -29,7 +26,7 @@ export class AuthController {
 
       response.json({ token });
     } catch (error) {
-      response.status(500).json({ message: "Erro ao fazer login." });
+      next(error);
     }
   }
 }

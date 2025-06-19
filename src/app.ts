@@ -1,6 +1,6 @@
 import express from "express";
-import { errorHandler } from "./middleware/errorHandler";
-import { connectToDatabase } from "./database/connection";
+import { errorHandler } from "./middlewares/errorHandler";
+import { connectToDatabase } from "./configs/database/connection";
 import { config } from "dotenv";
 import { registerRoutes } from "./routes/registerRoutes";
 
