@@ -11,7 +11,7 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: "TaskHub API",
       version: "1.0.0",
-      description: "Documentação completa da API TaskHub",
+      description: "Documentação completa da API TaskHub | Para iniciar crie um usuário através do endpoint /users. Após isso, faça login com as credenciais e autentique com o token obtido. Divirta-se!",
       contact: {
         name: "Equipe de Desenvolvimento",
         email: "m.henrique.caio@gmail.com",

@@ -82,7 +82,7 @@ export function userRoutes(app: Application) {
    *                   type: string
    *                   example: Erro interno do servidor.
    */
-  router.get("/", UserController.findAll);
+  router.get("/", authenticateToken, UserController.findAll);
 
   /**
    * @swagger
