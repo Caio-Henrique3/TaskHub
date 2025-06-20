@@ -10,7 +10,7 @@ export function taskRoutes(app: Application) {
    * @swagger
    * /tasks:
    *   get:
-   *     summary: Lista tarefas com filtros e paginação
+   *     summary: Lista de tarefas com filtros e paginação
    *     tags:
    *       - Tasks
    *     security:
@@ -20,25 +20,25 @@ export function taskRoutes(app: Application) {
    *         name: title
    *         schema:
    *           type: string
-   *         description: Filtrar por título (parcial)
+   *         description: Filtrar por título (parcial).
    *       - in: query
    *         name: status
    *         schema:
    *           type: string
-   *         description: Filtrar por status
+   *         description: Filtrar por status.
    *       - in: query
    *         name: page
    *         schema:
    *           type: integer
-   *         description: Página para paginação
+   *         description: Página para paginação.
    *       - in: query
    *         name: limit
    *         schema:
    *           type: integer
-   *         description: Limite de itens por página
+   *         description: Limite de itens por página.
    *     responses:
    *       200:
-   *         description: Lista de tarefas
+   *         description: Lista de tarefas.
    *         content:
    *           application/json:
    *             schema:
@@ -57,7 +57,7 @@ export function taskRoutes(app: Application) {
    *                 totalPages:
    *                   type: integer
    *       401:
-   *         description: "Não realizada a autenticação para obtenção de token"
+   *         description: "Não realizada a autenticação para obtenção de token."
    *         content:
    *           application/json:
    *             schema:
@@ -67,7 +67,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Token não fornecido.
    *       403:
-   *         description: "Token inválido ou expirado, necessário realizar login novamente"
+   *         description: "Token inválido ou expirado, necessário realizar login novamente."
    *         content:
    *           application/json:
    *             schema:
@@ -77,7 +77,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Token inválido ou expirado.
    *       500:
-   *         description: Erro interno do servidor
+   *         description: Erro interno do servidor.
    *         content:
    *           application/json:
    *             schema:
@@ -104,10 +104,10 @@ export function taskRoutes(app: Application) {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID da tarefa
+   *         description: ID da tarefa.
    *     responses:
    *       200:
-   *         description: Tarefa encontrada
+   *         description: Tarefa encontrada.
    *         content:
    *           application/json:
    *             schema:
@@ -123,7 +123,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Id 683f74a680e1efe4409088e254sdsad é inválido.
    *       401:
-   *         description: "Não realizada a autenticação para obtenção de token"
+   *         description: "Não realizada a autenticação para obtenção de token."
    *         content:
    *           application/json:
    *             schema:
@@ -133,7 +133,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Token não fornecido.
    *       403:
-   *         description: "Token inválido ou expirado, necessário realizar login novamente"
+   *         description: "Token inválido ou expirado, necessário realizar login novamente."
    *         content:
    *           application/json:
    *             schema:
@@ -153,7 +153,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Tarefa com id 683f74a680e1efe4409088e2 não encontrada.
    *       500:
-   *         description: Erro interno do servidor
+   *         description: Erro interno do servidor.
    *         content:
    *           application/json:
    *             schema:
@@ -182,9 +182,9 @@ export function taskRoutes(app: Application) {
    *             $ref: '#/components/schemas/Task'
    *     responses:
    *       201:
-   *         description: Tarefa criada com sucesso
+   *         description: Tarefa criada com sucesso.
    *       400:
-   *         description: "Requisição inválida (ID ou dados inválidos)"
+   *         description: "Requisição inválida (ID ou dados inválidos)."
    *         content:
    *           application/json:
    *             schema:
@@ -202,7 +202,7 @@ export function taskRoutes(app: Application) {
    *                 value:
    *                   message: Título, descrição e status são obrigatórios.
    *       401:
-   *         description: "Não realizada a autenticação para obtenção de token"
+   *         description: "Não realizada a autenticação para obtenção de token."
    *         content:
    *           application/json:
    *             schema:
@@ -212,7 +212,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Token não fornecido.
    *       403:
-   *         description: "Token inválido ou expirado, necessário realizar login novamente"
+   *         description: "Token inválido ou expirado, necessário realizar login novamente."
    *         content:
    *           application/json:
    *             schema:
@@ -232,7 +232,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Usuário com id 683f74a680e1efe4409088e2 não encontrado.
    *       500:
-   *         description: Erro interno do servidor
+   *         description: Erro interno do servidor.
    *         content:
    *           application/json:
    *             schema:
@@ -259,7 +259,7 @@ export function taskRoutes(app: Application) {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID da tarefa
+   *         description: ID da tarefa.
    *     requestBody:
    *       required: true
    *       content:
@@ -268,9 +268,13 @@ export function taskRoutes(app: Application) {
    *             $ref: '#/components/schemas/Task'
    *     responses:
    *       200:
-   *         description: Tarefa atualizada com sucesso
+   *         description: Tarefa atualizada com sucesso.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Task'
    *       400:
-   *         description: "Requisição inválida (ID ou dados inválidos)"
+   *         description: "Requisição inválida (ID ou dados inválidos)."
    *         content:
    *           application/json:
    *             schema:
@@ -288,7 +292,7 @@ export function taskRoutes(app: Application) {
    *                 value:
    *                   message: Título, descrição e status são obrigatórios.
    *       401:
-   *         description: "Não realizada a autenticação para obtenção de token"
+   *         description: "Não realizada a autenticação para obtenção de token."
    *         content:
    *           application/json:
    *             schema:
@@ -298,7 +302,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Token não fornecido.
    *       403:
-   *         description: "Token inválido ou expirado, necessário realizar login novamente"
+   *         description: "Token inválido ou expirado, necessário realizar login novamente."
    *         content:
    *           application/json:
    *             schema:
@@ -326,7 +330,7 @@ export function taskRoutes(app: Application) {
    *                 value:
    *                   message: Usuário com id 683f74a680e1efe4409088e2 não encontrado.
    *       500:
-   *         description: Erro interno do servidor
+   *         description: Erro interno do servidor.
    *         content:
    *           application/json:
    *             schema:
@@ -353,10 +357,10 @@ export function taskRoutes(app: Application) {
    *         required: true
    *         schema:
    *           type: string
-   *         description: ID da tarefa
+   *         description: ID da tarefa.
    *     responses:
    *       204:
-   *         description: Tarefa removida com sucesso
+   *         description: Tarefa removida com sucesso.
    *       400:
    *         description: "Id informado contém formato inválido."
    *         content:
@@ -368,7 +372,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Id 683f74a680e1efe4409088e254sdsad é inválido.
    *       401:
-   *         description: "Não realizada a autenticação para obtenção de token"
+   *         description: "Não realizada a autenticação para obtenção de token."
    *         content:
    *           application/json:
    *             schema:
@@ -378,7 +382,7 @@ export function taskRoutes(app: Application) {
    *                   type: string
    *                   example: Token não fornecido.
    *       403:
-   *         description: "Token inválido ou expirado, necessário realizar login novamente"
+   *         description: "Token inválido ou expirado, necessário realizar login novamente."
    *         content:
    *           application/json:
    *             schema:
@@ -396,9 +400,9 @@ export function taskRoutes(app: Application) {
    *               properties:
    *                 message:
    *                   type: string
-   *                   example: tarefa com id 683f74a680e1efe4409088e2 não encontrada.
+   *                   example: Tarefa com id 683f74a680e1efe4409088e2 não encontrada.
    *       500:
-   *         description: Erro interno do servidor
+   *         description: Erro interno do servidor.
    *         content:
    *           application/json:
    *             schema:

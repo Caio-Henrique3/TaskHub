@@ -162,7 +162,7 @@ export class TaskController {
         TaskService.count(filters),
       ]);
 
-      response.json({
+      response.send({
         data: tasks,
         page,
         limit,
@@ -234,10 +234,7 @@ export class TaskController {
 
       const task = request.body as Task;
 
-      const taskUpdated = await TaskService.update(
-        request.params.id,
-        task
-      );
+      const taskUpdated = await TaskService.update(request.params.id, task);
       if (!taskUpdated) {
         throw new NotFoundError(
           `Tarefa com id ${request.params.id} não encontrada.`
