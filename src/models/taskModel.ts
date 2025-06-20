@@ -38,3 +38,44 @@ const TaskSchema = new Schema({
 export type Task = InferSchemaType<typeof TaskSchema>;
 
 export const TaskModel = model<Task>("Task", TaskSchema);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Task:
+ *       type: object
+ *       required:
+ *         - title
+ *         - description
+ *         - status
+ *         - user
+ *       properties:
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *           maxLength: 500
+ *         suggestedStartDate:
+ *           type: string
+ *           example: "2023-08-15T09:00:00Z"
+ *         completionDeadline:
+ *           type: string
+ *           example: "2023-08-20T18:00:00Z"
+ *         appellant:
+ *           type: boolean
+ *           default: false
+ *         recurrenceEndDate:
+ *           type: string
+ *           example: "2023-12-31T23:59:59Z"
+ *         recurrence:
+ *           type: string
+ *           enum: [daily, weekly, monthly, annual]
+ *           description: Tipo de recorrência
+ *           example: "weekly"
+ *         status:
+ *           type: string
+ *           enum: [pending, started, completed, canceled]
+ *         user:
+ *           type: string
+ */

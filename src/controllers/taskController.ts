@@ -162,7 +162,7 @@ export class TaskController {
         TaskService.count(filters),
       ]);
 
-      response.json({
+      response.send({
         data: tasks,
         page,
         limit,
@@ -230,15 +230,18 @@ export class TaskController {
     next: NextFunction
   ) {
     try {
-      const taskUpdated = await TaskService.update(
-        request.params.id,
-        request.body as Task
-      );
+      await validateRelatedUser(request.body.user);
+
+      const task = request.body as Task;
+
+      const taskUpdated = await TaskService.update(request.params.id, task);
       if (!taskUpdated) {
         throw new NotFoundError(
           `Tarefa com id ${request.params.id} não encontrada.`
         );
       }
+
+      buildRecurrence(task, taskUpdated);
 
       response.send(taskUpdated);
     } catch (error: any) {

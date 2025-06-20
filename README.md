@@ -23,7 +23,7 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 - ✅ Filtro de tarefas por status (Obs: Implementação já criada para utilização de diversos filtros)
 - ✅ Paginação de consultas
 - ✅ Recorrência de tarefas
-- ⏳ Construção do swagger
+- ✅ Construção do swagger
 
 ### Pré-requisitos
 
@@ -35,7 +35,7 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/taskhub-api.git
+git clone https://github.com/Caio-Henrique3/TaskHub.git
 cd taskhub-api
 ```
 
