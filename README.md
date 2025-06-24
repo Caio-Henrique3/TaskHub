@@ -23,7 +23,7 @@ API RESTful desenvolvida com **Node.js**, **TypeScript** e **Express**, com aute
 - ✅ Filtro de tarefas por status (Obs: Implementação já criada para utilização de diversos filtros)
 - ✅ Paginação de consultas
 - ✅ Recorrência de tarefas
-- ✅ Construção do swagger
+- ✅ Construção do swagger (para acesso use o link https://taskhub-wkh0.onrender.com/docs)
 
 ### Pré-requisitos
 

@@ -3,8 +3,6 @@ import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import "dotenv/config";
 
-const PORT = process.env.PORT || 3000;
-
 const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
@@ -33,8 +31,8 @@ const options: swaggerJsdoc.Options = {
     ],
     servers: [
       {
-        url: `http://localhost:${PORT}`,
-        description: "Servidor de desenvolvimento",
+        url: `https://taskhub-wkh0.onrender.com/`,
+        description: "Servidor de Produção",
       },
     ],
   },
@@ -46,10 +44,8 @@ const swaggerSpec = swaggerJsdoc(options);
 export function swaggerConfigs(app: Express) {
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  app.get("/docs.json", (request: Request, response: Response) => {
+  app.get("/docs.json", (_: any, response: Response) => {
     response.setHeader("Content-Type", "application/json");
     response.send(swaggerSpec);
   });
-
-  console.log(`📑 Swagger docs available at http://localhost:${PORT}/docs`);
 }
